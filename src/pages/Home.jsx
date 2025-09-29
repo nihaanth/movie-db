@@ -106,10 +106,15 @@ function Home(){
             let searchResult;
             
             if (aiSearchEnabled && isAIEnabled()) {
+                console.log('Using AI Smart Search for:', searchQuery)
                 const aiParams = await naturalLanguageSearch(searchQuery)
+                console.log('AI parsed search params:', aiParams)
                 searchResult = await searchMovies(aiParams.searchTerms)
+                console.log('AI search results:', searchResult)
             } else {
+                console.log('Using regular search for:', searchQuery)
                 searchResult = await searchMovies(searchQuery)
+                console.log('Regular search results:', searchResult)
             }
             
             setMovies(searchResult)
@@ -120,6 +125,7 @@ function Home(){
         }
         finally{
             setLoading(false)
+            setSearchQuery('')
         }
     }
     const modeClick = () =>{
@@ -178,13 +184,19 @@ function Home(){
             onChange={(e) => setSearchQuery(e.target.value)}
             />
 
-            <button type="submit" className="search-button">Search</button>
+            <button type="submit" className="search-button">
+                {aiSearchEnabled ? 'AI Search' : 'Search'}
+            </button>
         
         </form>
 
         {error && <div className="error-message">
             {error}
         </div> }
+
+        {loading && aiSearchEnabled && <div className="ai-search-indicator">
+            🤖 AI is analyzing your search query...
+        </div>}
 
         {loading ? <div className="loading"> Loading ........</div> : 
          <>

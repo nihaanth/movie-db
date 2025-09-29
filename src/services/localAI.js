@@ -3,14 +3,17 @@
 
 // Movie genre mapping for smart recommendations
 const GENRE_KEYWORDS = {
-  action: ['action', 'fight', 'adventure', 'hero', 'battle', 'explosive'],
-  comedy: ['funny', 'laugh', 'humor', 'comic', 'hilarious', 'joke'],
-  drama: ['emotional', 'serious', 'deep', 'touching', 'dramatic'],
-  horror: ['scary', 'frightening', 'horror', 'creepy', 'nightmare'],
-  romance: ['love', 'romantic', 'relationship', 'romance', 'dating'],
-  'sci-fi': ['space', 'future', 'alien', 'technology', 'robot', 'time travel'],
-  thriller: ['suspense', 'mystery', 'tension', 'thrilling', 'intense'],
-  fantasy: ['magic', 'wizard', 'fantasy', 'mythical', 'supernatural']
+  action: ['action', 'fight', 'adventure', 'hero', 'battle', 'explosive', 'superhero', 'spy', 'war', 'martial arts', 'chase'],
+  comedy: ['funny', 'laugh', 'humor', 'comic', 'hilarious', 'joke', 'comedy', 'amusing', 'witty', 'parody', 'satire'],
+  drama: ['emotional', 'serious', 'deep', 'touching', 'dramatic', 'drama', 'heartfelt', 'moving', 'powerful', 'intense'],
+  horror: ['scary', 'frightening', 'horror', 'creepy', 'nightmare', 'terrifying', 'spooky', 'ghost', 'monster', 'zombie'],
+  romance: ['love', 'romantic', 'relationship', 'romance', 'dating', 'wedding', 'couple', 'passion', 'heart', 'valentine'],
+  'sci-fi': ['space', 'future', 'alien', 'technology', 'robot', 'time travel', 'sci-fi', 'science fiction', 'dystopian', 'cyber'],
+  thriller: ['suspense', 'mystery', 'tension', 'thrilling', 'intense', 'thriller', 'crime', 'detective', 'investigation'],
+  fantasy: ['magic', 'wizard', 'fantasy', 'mythical', 'supernatural', 'dragon', 'fairy', 'medieval', 'quest', 'enchanted'],
+  crime: ['crime', 'criminal', 'gang', 'heist', 'robbery', 'mafia', 'police', 'detective', 'murder', 'theft'],
+  animation: ['animated', 'cartoon', 'animation', 'disney', 'pixar', 'anime', 'kids', 'family'],
+  documentary: ['documentary', 'real', 'true story', 'factual', 'biography', 'historical', 'nature', 'wildlife']
 };
 
 // Check if local AI is enabled
@@ -170,6 +173,8 @@ export const getLocalRecommendations = async (favoriteMovies) => {
 
 // Natural language search parser (rule-based)
 export const parseNaturalLanguage = async (query) => {
+  console.log('🤖 AI Natural Language Processing:', query);
+  
   const lowerQuery = query.toLowerCase();
   
   let searchTerms = query;
@@ -181,6 +186,7 @@ export const parseNaturalLanguage = async (query) => {
   for (const [genreName, keywords] of Object.entries(GENRE_KEYWORDS)) {
     if (keywords.some(keyword => lowerQuery.includes(keyword))) {
       genre = genreName;
+      console.log('🎭 Detected genre:', genreName);
       break;
     }
   }
@@ -189,30 +195,70 @@ export const parseNaturalLanguage = async (query) => {
   const yearMatch = lowerQuery.match(/(\d{4})|(\d{2}s)|(19\d{2})|(20\d{2})/);
   if (yearMatch) {
     yearRange = yearMatch[0];
+    console.log('📅 Detected year:', yearRange);
   }
 
   // Extract mood/theme
   if (lowerQuery.includes('feel good') || lowerQuery.includes('uplifting')) {
     mood = 'feel-good';
+    console.log('😊 Detected mood: feel-good');
   } else if (lowerQuery.includes('dark') || lowerQuery.includes('serious')) {
     mood = 'dark';
+    console.log('🌑 Detected mood: dark');
   } else if (lowerQuery.includes('light') || lowerQuery.includes('fun')) {
     mood = 'light';
+    console.log('☀️ Detected mood: light');
   }
 
-  // Clean search terms
-  const cleanTerms = query
-    .replace(/\b(movies?|films?|from|the|in)\b/gi, '')
-    .replace(/\b\d{4}s?\b/g, '')
-    .replace(/\b(funny|scary|romantic|action)\b/gi, '')
-    .trim();
+  // For AI search, let's be very conservative and smart about term selection
+  let finalSearchTerms = query;
 
-  return {
-    searchTerms: cleanTerms || genre || 'popular',
+  // If we detected a specific genre and the query is simple, use a targeted approach
+  if (genre && query.toLowerCase().includes('funny')) {
+    finalSearchTerms = 'funny';
+  } else if (genre && query.toLowerCase().includes('scary')) {
+    finalSearchTerms = 'scary';
+  } else if (genre && query.toLowerCase().includes('action')) {
+    finalSearchTerms = 'action';
+  } else if (genre && query.toLowerCase().includes('romantic')) {
+    finalSearchTerms = 'romantic';
+  } else if (genre) {
+    // Use the genre name itself for broader searches
+    const genreNames = {
+      'action': 'action',
+      'comedy': 'comedy',
+      'drama': 'drama', 
+      'horror': 'horror',
+      'romance': 'romance',
+      'sci-fi': 'science fiction',
+      'thriller': 'thriller',
+      'fantasy': 'fantasy',
+      'crime': 'crime',
+      'animation': 'animation',
+      'documentary': 'documentary'
+    };
+    finalSearchTerms = genreNames[genre] || genre;
+  } else {
+    // No genre detected, clean up the query minimally
+    finalSearchTerms = query
+      .replace(/\b(movies?|films?)\b/gi, '')
+      .trim();
+  }
+
+  // Add year if detected and not already included
+  if (yearRange && !finalSearchTerms.includes(yearRange)) {
+    finalSearchTerms += ` ${yearRange}`;
+  }
+
+  const result = {
+    searchTerms: finalSearchTerms || 'popular',
     genre,
     yearRange,
     mood
   };
+
+  console.log('🧠 AI parsed result:', result);
+  return result;
 };
 
 // Free Hugging Face API call (no authentication needed for some models)

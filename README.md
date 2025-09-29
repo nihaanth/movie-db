@@ -2,6 +2,23 @@
 
 A modern React-based movie database application with AI-powered recommendations, smart search, and beautiful theming. Browse popular movies, get personalized recommendations, and manage your favorites with an intuitive interface.
 
+## Screenshots
+
+### Home Page - Dark Theme
+![Home Page Dark](./screenshots/home-dark.png)
+
+### Home Page - Light Theme  
+![Home Page Light](./screenshots/home-light.png)
+
+### AI Recommendations
+![AI Recommendations](./screenshots/ai-recommendations.png)
+
+### Favorites Page
+![Favorites Page](./screenshots/favorites.png)
+
+### Smart Search
+![Smart Search](./screenshots/smart-search.png)
+
 ## Features
 
 - **AI-Powered Recommendations**: Get personalized movie suggestions based on your favorites
